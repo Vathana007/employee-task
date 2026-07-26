@@ -1,15 +1,15 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
 
-Route::get('/hello', function () {
+Route::get('/users', [UserController::class, 'index']);
 
-    return [
-        "message" => "Hello Laravel API"
-    ];
+Route::get('/users/{id}', [UserController::class, 'show']);
 
-});
+Route::post('/users', [UserController::class, 'store']);
+
+Route::put('/users/{id}', [UserController::class, 'update']);
+
+Route::delete('/users/{id}', [UserController::class, 'destroy']);
