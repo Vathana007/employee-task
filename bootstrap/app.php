@@ -17,8 +17,21 @@ return Application::configure(basePath: dirname(__DIR__))
             'api/users/*',
             'api/projects',
             'api/projects/*',
-    ]);
+        ]);
+        
+        $middleware->redirectGuestsTo(function (\Illuminate\Http\Request $request) {
+            if ($request->is('api/*')) {
+                return null;
+            }
+            return route('login');
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->shouldRenderJsonWhen(function (\Illuminate\Http\Request $request, \Throwable $e) {
+            if ($request->is('api/*')) {
+                return true;
+            }
+            
+            return $request->expectsJson();
+        });
     })->create();
