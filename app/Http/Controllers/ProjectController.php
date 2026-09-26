@@ -2,27 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Project;
+use Illuminate\Http\Request;
 
 class ProjectController extends Controller
 {
-    public function index() {
-        $projects = Project::all();
+    public function index()
+    {
+        $projects = Project::withCount($this->progressCounts())->get();
+
         return response()->json([
-            "message" => "Projects retrieved successfully",
-            "data" => $projects
+            'message' => 'Projects retrieved successfully',
+            'data' => $projects,
         ]);
     }
 
-    public function show($id) {
-        $projects = Project::find($id);
-        if($projects) {
+    public function show($id)
+    {
+        $project = Project::withCount($this->progressCounts())->find($id);
+
+        if ($project) {
             return response()->json([
-                "message" => "Project retrieved successfully",
-                "data" => $projects
+                'message' => 'Project retrieved successfully',
+                'data' => $project,
             ]);
         }
+
         return response()->json(['message' => 'Project not found'], 404);
     }
 
@@ -35,12 +40,13 @@ class ProjectController extends Controller
         ]);
 
         $project = Project::create([
-            'user_id' => 2
-            , 
+            'user_id' => auth('sanctum')->id(),
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
             'status' => $validated['status'],
         ]);
+
+        $project->loadCount($this->progressCounts());
 
         return response()->json([
             'message' => 'Project created successfully',
@@ -48,39 +54,49 @@ class ProjectController extends Controller
         ], 201);
     }
 
-    public function update(Request $request, $id) {
+    public function update(Request $request, $id)
+    {
         $project = Project::find($id);
 
-        if(!$project) {
+        if (! $project) {
             return response()->json(['message' => 'Project not found'], 404);
         }
 
-        $request->validate([
-            "name" => "sometimes|required|string",
-            "description" => "sometimes|required|string",
-            "start_date" => "sometimes|required|date",
-            "end_date" => "sometimes|required|date|after_or_equal:start_date"
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'description' => 'nullable|string',
+            'status' => 'sometimes|required|in:pending,in_progress,completed',
         ]);
 
-        $project->update($request->all());
+        $project->update($validated);
+        $project->loadCount($this->progressCounts());
 
         return response()->json([
-            "message" => "Project updated successfully",
-            "data" => $project
+            'message' => 'Project updated successfully',
+            'data' => $project,
         ]);
     }
 
-    public function destroy($id) {
+    public function destroy($id)
+    {
         $project = Project::find($id);
 
-        if(!$project) {
+        if (! $project) {
             return response()->json(['message' => 'Project not found'], 404);
         }
 
         $project->delete();
 
         return response()->json([
-            "message" => "Project deleted successfully"
+            'message' => 'Project deleted successfully',
         ]);
+    }
+
+    private function progressCounts(): array
+    {
+        return [
+            'tasks',
+            'tasks as completed_tasks_count' => fn ($q) => $q->where('status', 'completed'),
+        ];
     }
 }

@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
+Route::post('/send-verification-email', [AuthController::class, 'sendVerificationEmail']);
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -19,4 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('projects', ProjectController::class);
     Route::apiResource('tasks', TaskController::class);
     Route::apiResource('comments', CommentController::class);
+    Route::put('/users/{id}', [UserController::class, 'update']);
+    Route::post('/users/{id}/avatar', [UserController::class, 'uploadAvatar']);
+    Route::put('/users/{id}/password', [UserController::class, 'changePassword']);
 });
