@@ -1,6 +1,12 @@
 <template>
   <div
     class="min-h-screen relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-sky-50 via-white to-sky-100">
+    <!-- Language Toggle -->
+    <button @click="onToggleLocale" :title="t('layout.switchLanguage')"
+      class="fixed top-4 right-4 z-20 px-2.5 py-1.5 rounded-lg bg-white/70 backdrop-blur-sm shadow-sm hover:bg-white transition cursor-pointer text-xs font-bold text-slate-600 min-w-[2.5rem]">
+      {{ locale === 'km' ? t('layout.languageEn') : t('layout.languageKm') }}
+    </button>
+
     <!-- Background -->
     <div
       class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-sky-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob">
@@ -25,11 +31,11 @@
           </div>
 
           <h2 class="text-3xl font-bold tracking-tight text-slate-800">
-            Welcome Back
+            {{ t('auth.welcomeBack') }}
           </h2>
 
           <p class="mt-2 text-sm text-slate-500">
-            Please sign in to your account
+            {{ t('auth.signInPrompt') }}
           </p>
         </div>
 
@@ -49,7 +55,7 @@
             <!-- Email -->
             <div>
               <label for="email" class="block text-sm font-semibold text-slate-700 mb-1">
-                Email Address
+                {{ t('auth.emailAddress') }}
               </label>
 
               <div class="relative">
@@ -65,12 +71,12 @@
             <div>
               <div class="flex items-center justify-between mb-1">
                 <label for="password" class="block text-sm font-semibold text-slate-700">
-                  Password
+                  {{ t('auth.password') }}
                 </label>
 
                 <button type="button" @click="handleForgotPassword"
                   class="text-sm font-semibold text-sky-600 hover:text-sky-500 cursor-pointer">
-                  Forgot password?
+                  {{ t('auth.forgotPassword') }}
                 </button>
               </div>
 
@@ -95,7 +101,7 @@
             <button type="submit" :disabled="loading"
               class="group flex w-full justify-center rounded-xl bg-sky-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 hover:bg-sky-400 transition-all disabled:opacity-70 cursor-pointer">
               <span v-if="!loading" class="flex items-center">
-                Sign In
+                {{ t('auth.signIn') }}
 
                 <ArrowRight class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </span>
@@ -103,17 +109,17 @@
               <span v-else class="flex items-center">
                 <LoaderCircle class="animate-spin mr-3 h-5 w-5" />
 
-                Processing...
+                {{ t('common.processing') }}
               </span>
             </button>
           </form>
 
           <!-- Register -->
           <p class="mt-8 text-center text-sm text-slate-500">
-            Don't have an account?
+            {{ t('auth.noAccount') }}
 
             <router-link to="/register" class="font-semibold text-sky-600 hover:text-sky-500">
-              Create one now
+              {{ t('auth.createOne') }}
             </router-link>
           </p>
         </div>
@@ -125,6 +131,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { toggleLocale } from '../i18n';
 
 import {
   ArrowRight,
@@ -140,6 +148,7 @@ import {
 import api from '../services/api';
 
 const router = useRouter();
+const { t, locale } = useI18n();
 
 const form = ref({
   email: '',
@@ -150,6 +159,10 @@ const error = ref('');
 const loading = ref(false);
 
 const showPassword = ref(false);
+
+function onToggleLocale() {
+  toggleLocale();
+}
 
 const handleLogin = async () => {
   loading.value = true;
@@ -167,7 +180,7 @@ const handleLogin = async () => {
   } catch (err: any) {
     error.value =
       err.response?.data?.message ||
-      'Invalid credentials. Please try again.';
+      t('auth.invalidCredentials');
   } finally {
     loading.value = false;
   }

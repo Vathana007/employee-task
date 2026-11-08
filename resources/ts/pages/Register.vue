@@ -1,6 +1,12 @@
 <template>
   <div
     class="min-h-screen relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-sky-50 via-white to-sky-100 py-12">
+    <!-- Language Toggle -->
+    <button @click="onToggleLocale" :title="t('layout.switchLanguage')"
+      class="fixed top-4 right-4 z-20 px-2.5 py-1.5 rounded-lg bg-white/70 backdrop-blur-sm shadow-sm hover:bg-white transition cursor-pointer text-xs font-bold text-slate-600 min-w-[2.5rem]">
+      {{ locale === 'km' ? t('layout.languageEn') : t('layout.languageKm') }}
+    </button>
+
     <!-- Decorative background elements -->
     <div
       class="absolute top-[10%] left-[-5%] w-96 h-96 bg-sky-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob">
@@ -24,11 +30,11 @@
           </div>
 
           <h2 class="text-3xl font-bold tracking-tight text-slate-800">
-            Join Us Today
+            {{ t('auth.joinUs') }}
           </h2>
 
           <p class="mt-2 text-sm text-slate-500">
-            Create your account to get started
+            {{ t('auth.createAccountPrompt') }}
           </p>
         </div>
 
@@ -47,7 +53,7 @@
             <!-- Full Name -->
             <div class="space-y-1">
               <label for="name" class="block text-sm font-semibold leading-6 text-slate-700">
-                Full Name
+                {{ t('auth.fullName') }}
               </label>
 
               <div class="relative">
@@ -76,7 +82,7 @@
             <!-- Email -->
             <div class="space-y-1">
               <label for="email" class="block text-sm font-semibold leading-6 text-slate-700">
-                Email Address
+                {{ t('auth.emailAddress') }}
               </label>
 
               <div class="relative">
@@ -105,7 +111,7 @@
             <!-- Password -->
             <div class="space-y-1">
               <label for="password" class="block text-sm font-semibold leading-6 text-slate-700">
-                Password
+                {{ t('auth.password') }}
               </label>
 
               <div class="relative">
@@ -128,7 +134,7 @@
                   type="button" 
                   @click="showPassword = !showPassword"
                   class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-sky-500 transition-colors cursor-pointer"
-                  :aria-label="showPassword ? 'Hide password' : 'Show password'">
+                  :aria-label="showPassword ? t('common.hidePassword') : t('common.showPassword')">
                   <EyeOff v-if="showPassword" class="h-5 w-5" />
                   <Eye v-else class="h-5 w-5" />
                 </button>
@@ -140,10 +146,10 @@
                   <span class="mr-1">❌</span>{{ errors.password }}
                 </span>
                 <span v-else-if="form.password && form.password.length >= 8" class="text-green-600 text-sm">
-                  ✅ Password strong
+                  ✅ {{ t('auth.passwordStrong') }}
                 </span>
                 <span v-else class="text-slate-400 text-xs">
-                  Min 8 characters
+                  {{ t('auth.minEightChars') }}
                 </span>
               </div>
             </div>
@@ -151,7 +157,7 @@
             <!-- Confirm Password -->
             <div class="space-y-1">
               <label for="password_confirmation" class="block text-sm font-semibold leading-6 text-slate-700">
-                Confirm Password
+                {{ t('auth.confirmPassword') }}
               </label>
 
               <div class="relative">
@@ -174,7 +180,7 @@
                   type="button" 
                   @click="showPasswordConfirmation = !showPasswordConfirmation"
                   class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-sky-500 transition-colors cursor-pointer"
-                  :aria-label="showPasswordConfirmation ? 'Hide password' : 'Show password'">
+                  :aria-label="showPasswordConfirmation ? t('common.hidePassword') : t('common.showPassword')">
                   <EyeOff v-if="showPasswordConfirmation" class="h-5 w-5" />
                   <Eye v-else class="h-5 w-5" />
                 </button>
@@ -186,7 +192,7 @@
                   <span class="mr-1">❌</span>{{ errors.password_confirmation }}
                 </span>
                 <span v-else-if="form.password_confirmation && passwordsMatch" class="text-green-600 text-sm">
-                  ✅ Passwords match
+                  ✅ {{ t('auth.passwordsMatch') }}
                 </span>
               </div>
             </div>
@@ -198,7 +204,7 @@
                 :disabled="!isFormValid || loading"
                 class="group relative flex w-full justify-center rounded-xl bg-sky-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 hover:bg-sky-400 hover:shadow-sky-500/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 transition-all duration-300 disabled:opacity-70 transform hover:disabled:translate-y-0 hover:-translate-y-0.5 cursor-pointer">
                 <span v-if="!loading" class="flex items-center">
-                  Create Account
+                  {{ t('auth.createAccount') }}
 
                   <ArrowRight class="w-4 h-4 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
                 </span>
@@ -206,7 +212,7 @@
                 <span v-else class="flex items-center">
                   <LoaderCircle class="animate-spin -ml-1 mr-3 h-5 w-5" />
 
-                  Processing...
+                  {{ t('common.processing') }}
                 </span>
               </button>
             </div>
@@ -214,12 +220,12 @@
 
           <!-- Login Link -->
           <p class="mt-8 text-center text-sm text-slate-500">
-            Already have an account?
+            {{ t('auth.haveAccount') }}
 
             <router-link 
               to="/login"
               class="font-semibold text-sky-600 hover:text-sky-500 transition-colors relative after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-sky-500 after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left">
-              Sign in here
+              {{ t('auth.signInHere') }}
             </router-link>
           </p>
         </div>
@@ -231,6 +237,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { toggleLocale } from '../i18n';
 import {
   ArrowRight,
   CircleAlert,
@@ -246,6 +254,7 @@ import {
 import api from '../services/api';
 
 const router = useRouter();
+const { t, locale } = useI18n();
 
 const form = ref({
   name: '',
@@ -269,6 +278,10 @@ const loading = ref(false);
 const showPassword = ref(false);
 const showPasswordConfirmation = ref(false);
 
+function onToggleLocale() {
+  toggleLocale();
+}
+
 // Check if passwords match in real-time
 const passwordsMatch = computed(() => {
   if (!form.value.password || !form.value.password_confirmation) {
@@ -290,7 +303,7 @@ const isFormValid = computed(() => {
 // Validate password strength on input
 const validatePassword = () => {
   if (form.value.password && form.value.password.length < 8) {
-    errors.value.password = 'Password must be at least 8 characters';
+    errors.value.password = t('auth.passwordMinLength');
   } else {
     errors.value.password = '';
   }
@@ -299,7 +312,7 @@ const validatePassword = () => {
 // Real-time password match check
 const checkPasswordMatch = () => {
   if (form.value.password_confirmation && form.value.password !== form.value.password_confirmation) {
-    errors.value.password_confirmation = 'Passwords do not match';
+    errors.value.password_confirmation = t('auth.passwordsMismatch');
   } else {
     errors.value.password_confirmation = '';
   }
@@ -313,28 +326,28 @@ const handleRegister = async () => {
   let hasErrors = false;
 
   if (!form.value.name.trim()) {
-    errors.value.name = 'Name is required';
+    errors.value.name = t('auth.nameRequired');
     hasErrors = true;
   }
 
   if (!form.value.email.trim()) {
-    errors.value.email = 'Email is required';
+    errors.value.email = t('auth.emailRequired');
     hasErrors = true;
   }
 
   if (!form.value.password) {
-    errors.value.password = 'Password is required';
+    errors.value.password = t('auth.passwordRequired');
     hasErrors = true;
   } else if (form.value.password.length < 8) {
-    errors.value.password = 'Password must be at least 8 characters';
+    errors.value.password = t('auth.passwordMinLength');
     hasErrors = true;
   }
 
   if (!form.value.password_confirmation) {
-    errors.value.password_confirmation = 'Confirm password is required';
+    errors.value.password_confirmation = t('auth.confirmPasswordRequired');
     hasErrors = true;
   } else if (form.value.password !== form.value.password_confirmation) {
-    errors.value.password_confirmation = 'Passwords do not match';
+    errors.value.password_confirmation = t('auth.passwordsMismatch');
     hasErrors = true;
   }
 
@@ -381,7 +394,7 @@ const handleRegister = async () => {
       }
     } else {
       // Show general error if no field-specific errors
-      error.value = err.response?.data?.message || 'Failed to register. Please try again.';
+      error.value = err.response?.data?.message || t('auth.registerFailed');
     }
   } finally {
     loading.value = false;

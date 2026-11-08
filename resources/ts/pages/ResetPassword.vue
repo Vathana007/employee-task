@@ -1,6 +1,12 @@
 <template>
     <div
         class="min-h-screen relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-sky-50 via-white to-sky-100">
+        <!-- Language Toggle -->
+        <button @click="onToggleLocale" :title="t('layout.switchLanguage')"
+            class="fixed top-4 right-4 z-20 px-2.5 py-1.5 rounded-lg bg-white/70 backdrop-blur-sm shadow-sm hover:bg-white transition cursor-pointer text-xs font-bold text-slate-600 min-w-[2.5rem]">
+            {{ locale === 'km' ? t('layout.languageEn') : t('layout.languageKm') }}
+        </button>
+
         <!-- Background -->
         <div
             class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-sky-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob">
@@ -26,11 +32,11 @@
                     </div>
 
                     <h2 class="text-3xl font-bold tracking-tight text-slate-800">
-                        Create New Password
+                        {{ t('auth.createNewPassword') }}
                     </h2>
 
                     <p class="mt-2 text-sm text-slate-500">
-                        Enter your new password below
+                        {{ t('auth.setNewPasswordPrompt') }}
                     </p>
                 </div>
 
@@ -43,9 +49,9 @@
                         </div>
 
                         <div>
-                            <h3 class="text-lg font-semibold text-slate-800 mb-2">Password reset successful</h3>
+                            <h3 class="text-lg font-semibold text-slate-800 mb-2">{{ t('auth.resetSuccess') }}</h3>
                             <p class="text-sm text-slate-600 mb-4">
-                                Your password has been reset. You can now sign in with your new password.
+                                {{ t('auth.resetSuccessDesc') }}
                             </p>
                         </div>
 
@@ -53,7 +59,7 @@
                             <button @click="handleBackToLogin"
                                 class="w-full flex items-center justify-center rounded-xl bg-sky-500 px-4 py-3 text-sm font-semibold text-white hover:bg-sky-400 transition-all cursor-pointer">
                                 <ArrowRight class="w-4 h-4 mr-2" />
-                                Sign In
+                                {{ t('auth.signIn') }}
                             </button>
                         </div>
                     </div>
@@ -74,7 +80,7 @@
                         <!-- Password -->
                         <div>
                             <label for="password" class="block text-sm font-semibold text-slate-700 mb-1">
-                                New Password
+                                {{ t('auth.newPassword') }}
                             </label>
 
                             <div class="relative">
@@ -92,13 +98,13 @@
                                     <Eye v-else class="h-5 w-5" />
                                 </button>
                             </div>
-                            <p class="text-xs text-slate-400 mt-1">Minimum 8 characters</p>
+                            <p class="text-xs text-slate-400 mt-1">{{ t('auth.minEightChars') }}</p>
                         </div>
 
                         <!-- Confirm Password -->
                         <div>
                             <label for="password_confirmation" class="block text-sm font-semibold text-slate-700 mb-1">
-                                Confirm Password
+                                {{ t('auth.confirmPassword') }}
                             </label>
 
                             <div class="relative">
@@ -123,7 +129,7 @@
                         <button type="submit" :disabled="loading"
                             class="group flex w-full justify-center rounded-xl bg-sky-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 hover:bg-sky-400 transition-all disabled:opacity-70 cursor-pointer">
                             <span v-if="!loading" class="flex items-center">
-                                Reset Password
+                                {{ t('auth.resetPasswordBtn') }}
 
                                 <ArrowRight class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                             </span>
@@ -131,17 +137,17 @@
                             <span v-else class="flex items-center">
                                 <LoaderCircle class="animate-spin mr-3 h-5 w-5" />
 
-                                Processing...
+                                {{ t('common.processing') }}
                             </span>
                         </button>
                     </form>
 
                     <!-- Back to Login -->
                     <p class="mt-8 text-center text-sm text-slate-500">
-                        Remember your password?
+                        {{ t('auth.rememberPassword') }}
 
                         <router-link to="/login" class="font-semibold text-sky-600 hover:text-sky-500">
-                            Sign in
+                            {{ t('auth.signInLink') }}
                         </router-link>
                     </p>
                 </div>
@@ -153,6 +159,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { toggleLocale } from '../i18n';
 
 import {
     ArrowRight,
@@ -168,6 +176,7 @@ import api from '../services/api';
 
 const router = useRouter();
 const route = useRoute();
+const { t, locale } = useI18n();
 
 const form = ref({
     email: '',
@@ -181,19 +190,23 @@ const loading = ref(false);
 const submitted = ref(false);
 const showPassword = ref(false);
 
+function onToggleLocale() {
+    toggleLocale();
+}
+
 onMounted(() => {
     // Get email and token from route params
     form.value.email = route.query.email as string || '';
     form.value.token = route.query.token as string || '';
 
     if (!form.value.email || !form.value.token) {
-        error.value = 'Invalid reset link. Please try again.';
+        error.value = t('auth.invalidResetLink');
     }
 });
 
 const handleResetPassword = async () => {
     if (form.value.password !== form.value.password_confirmation) {
-        error.value = 'Passwords do not match.';
+        error.value = t('auth.passwordsMismatch');
         return;
     }
 
@@ -212,7 +225,7 @@ const handleResetPassword = async () => {
     } catch (err: any) {
         error.value =
             err.response?.data?.message ||
-            'Failed to reset password. Please try again.';
+            t('auth.resetFailed');
     } finally {
         loading.value = false;
     }

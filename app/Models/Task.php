@@ -17,7 +17,8 @@ class Task extends Model
         'description',
         'priority',
         'status',
-        'deadline',
+        'start_date',
+        'end_date',
     ];
 
     // Table Relationships

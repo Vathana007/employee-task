@@ -1,9 +1,9 @@
 <template>
-  <AppLayout title="Settings" subtitle="Manage your account preferences">
+  <AppLayout :title="t('settings.title')" :subtitle="t('settings.subtitle')">
     <div class="max-w-2xl space-y-5">
 
-      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-        <h2 class="text-sm font-bold text-slate-800 mb-4">Profile Information</h2>
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 dark:bg-slate-900 dark:border-slate-600">
+        <h2 class="text-sm font-bold text-slate-800 mb-4 dark:text-slate-100">{{ t('settings.profileInformation') }}</h2>
         <form @submit.prevent="saveProfile" class="space-y-4">
           <div v-if="profileMsg"
             :class="profileMsg.type === 'success' ? 'text-emerald-700 bg-emerald-50 border-emerald-300' : 'text-red-700 bg-red-50 border-red-300'"
@@ -15,29 +15,29 @@
                 class="w-16 h-16 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center text-white text-2xl font-bold shadow-md">
                 {{ user?.name ? user.name.charAt(0).toUpperCase() : 'U' }}
               </div>
-              <img v-else :src="avatarPreview || user?.avatar_url" alt="Profile avatar"
+              <img v-else :src="avatarPreview || user?.avatar_url" :alt="t('settings.profileInformation')"
                 class="w-16 h-16 rounded-full object-cover shadow-md" />
 
               <label
                 class="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/40 flex items-center justify-center cursor-pointer transition"
-                title="Change photo">
+                :title="t('settings.changePhoto')">
                 <Camera class="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition" />
                 <input type="file" accept="image/png,image/jpeg,image/webp" class="hidden" @change="onAvatarSelected" />
               </label>
             </div>
 
             <div>
-              <p class="font-semibold text-slate-800">{{ user?.name }}</p>
-              <p class="text-sm text-slate-400">{{ user?.email }}</p>
+              <p class="font-semibold text-slate-800 dark:text-slate-100">{{ user?.name }}</p>
+              <p class="text-sm text-slate-400 dark:text-slate-300">{{ user?.email }}</p>
 
               <div class="flex items-center gap-2 mt-2" v-if="avatarFile">
                 <button type="button" @click="uploadAvatar" :disabled="uploadingAvatar"
                   class="text-xs font-semibold px-3 py-1.5 rounded-md bg-sky-500 text-white hover:bg-sky-600 disabled:opacity-60 cursor-pointer">
-                  {{ uploadingAvatar ? 'Uploading...' : 'Upload photo' }}
+                  {{ uploadingAvatar ? t('common.uploading') : t('settings.uploadPhoto') }}
                 </button>
                 <button type="button" @click="cancelAvatar"
                   class="text-xs font-semibold px-3 py-1.5 rounded-md text-slate-500 hover:bg-slate-100 cursor-pointer">
-                  Cancel
+                  {{ t('common.cancel') }}
                 </button>
               </div>
               <p v-if="avatarMsg" :class="avatarMsg.type === 'success' ? 'text-emerald-600' : 'text-red-600'"
@@ -48,67 +48,67 @@
           </div>
 
           <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1">Full Name</label>
+            <label class="block text-sm font-semibold text-slate-700 mb-1 dark:text-slate-200">{{ t('settings.fullName') }}</label>
             <input v-model="profileForm.name" type="text" required
-              class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
+              class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100" />
           </div>
           <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1">Email Address</label>
+            <label class="block text-sm font-semibold text-slate-700 mb-1 dark:text-slate-200">{{ t('settings.emailAddress') }}</label>
             <input v-model="profileForm.email" type="email" required
-              class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
+              class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100" />
           </div>
           <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1">Role</label>
-            <div class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm bg-slate-50 text-slate-600">
+            <label class="block text-sm font-semibold text-slate-700 mb-1 dark:text-slate-200">{{ t('settings.role') }}</label>
+            <div class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm bg-slate-50 text-slate-600 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-200">
               {{ getRoleLabel(profileForm.role) }}
             </div>
-            <p class="text-xs text-slate-400 mt-1">Role is assigned by administrator only</p>
+            <p class="text-xs text-slate-400 mt-1 dark:text-slate-300">{{ t('settings.roleHint') }}</p>
           </div>
 
           <button type="submit" :disabled="savingProfile"
             class="px-5 py-2.5 rounded-lg bg-sky-500 text-white text-sm font-semibold hover:bg-sky-600 transition disabled:opacity-60 cursor-pointer">
-            {{ savingProfile ? 'Saving...' : 'Save Changes' }}
+            {{ savingProfile ? t('common.saving') : t('common.saveChanges') }}
           </button>
         </form>
       </div>
 
-      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-        <h2 class="text-sm font-bold text-slate-800 mb-4">Change Password</h2>
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 dark:bg-slate-900 dark:border-slate-600">
+        <h2 class="text-sm font-bold text-slate-800 mb-4 dark:text-slate-100">{{ t('settings.changePassword') }}</h2>
         <form @submit.prevent="changePassword" class="space-y-4">
           <div v-if="passwordMsg"
             :class="passwordMsg.type === 'success' ? 'text-emerald-700 bg-emerald-50 border-emerald-300' : 'text-red-700 bg-red-50 border-red-300'"
             class="text-sm p-3 rounded-lg border-l-4">{{ passwordMsg.text }}</div>
 
           <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1">Current Password</label>
+            <label class="block text-sm font-semibold text-slate-700 mb-1 dark:text-slate-200">{{ t('settings.currentPassword') }}</label>
             <input v-model="passwordForm.current_password" type="password" required placeholder="••••••••"
-              class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
+              class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100" />
           </div>
           <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1">New Password</label>
-            <input v-model="passwordForm.password" type="password" required placeholder="Min. 8 characters"
-              class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
+            <label class="block text-sm font-semibold text-slate-700 mb-1 dark:text-slate-200">{{ t('settings.newPassword') }}</label>
+            <input v-model="passwordForm.password" type="password" required :placeholder="t('settings.minChars')"
+              class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100" />
           </div>
           <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1">Confirm New Password</label>
+            <label class="block text-sm font-semibold text-slate-700 mb-1 dark:text-slate-200">{{ t('settings.confirmNewPassword') }}</label>
             <input v-model="passwordForm.password_confirmation" type="password" required placeholder="••••••••"
-              class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
+              class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100" />
           </div>
 
           <button type="submit" :disabled="savingPassword"
             class="px-5 py-2.5 rounded-lg bg-sky-500 text-white text-sm font-semibold hover:bg-sky-600 transition disabled:opacity-60 cursor-pointer">
-            {{ savingPassword ? 'Updating...' : 'Update Password' }}
+            {{ savingPassword ? t('common.updating') : t('settings.updatePassword') }}
           </button>
         </form>
       </div>
 
-      <div class="bg-white rounded-xl border border-red-100 shadow-sm p-6">
-        <h2 class="text-sm font-bold text-slate-800 mb-1">Danger Zone</h2>
-        <p class="text-xs text-slate-400 mb-4">Once you log out, you will need your credentials to sign back in.</p>
+      <div class="bg-white rounded-xl border border-red-100 shadow-sm p-6 dark:bg-slate-900 dark:border-red-500/40">
+        <h2 class="text-sm font-bold text-slate-800 mb-1 dark:text-slate-100">{{ t('settings.dangerZone') }}</h2>
+        <p class="text-xs text-slate-400 mb-4 dark:text-slate-300">{{ t('settings.dangerHint') }}</p>
         <button @click="confirmLogout"
-          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-red-50 text-red-600 text-sm font-semibold hover:bg-red-100 transition cursor-pointer">
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-red-50 text-red-600 text-sm font-semibold hover:bg-red-100 transition cursor-pointer dark:bg-red-500/10 dark:text-red-300">
           <LogOut class="w-4 h-4" />
-          Sign Out
+          {{ t('settings.signOut') }}
         </button>
       </div>
 
@@ -118,11 +118,13 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { LogOut, Camera } from 'lucide-vue-next';
 import AppLayout from '../components/layout/AppLayout.vue';
 import { useLayout } from '../composables/useLayout.js';
 import api from '../services/api.js';
 
+const { t } = useI18n();
 const { user, confirmLogout } = useLayout();
 
 const profileForm = ref({ name: '', email: '', role: '' });
@@ -145,13 +147,10 @@ watch(user, (u) => {
   }
 }, { immediate: true });
 
-const getRoleLabel = (role: string) => {
-  const roleMap: Record<string, string> = {
-    admin: 'Admin',
-    editor: 'Editor',
-    user: 'User'
-  };
-  return roleMap[role] || role;
+const getRoleLabel = (role: string): string => {
+  const key = `settings.roles.${role}`;
+  const label = t(key);
+  return label !== key ? label : role;
 };
 
 const saveProfile = async () => {
@@ -166,9 +165,9 @@ const saveProfile = async () => {
       user.value.name = profileForm.value.name;
       user.value.email = profileForm.value.email;
     }
-    profileMsg.value = { type: 'success', text: 'Profile updated successfully.' };
+    profileMsg.value = { type: 'success', text: t('settings.profileUpdated') };
   } catch (e: any) {
-    profileMsg.value = { type: 'error', text: e.response?.data?.message ?? 'Failed to update profile.' };
+    profileMsg.value = { type: 'error', text: e.response?.data?.message ?? t('settings.profileFailed') };
   } finally {
     savingProfile.value = false;
   }
@@ -176,7 +175,7 @@ const saveProfile = async () => {
 
 const changePassword = async () => {
   if (passwordForm.value.password !== passwordForm.value.password_confirmation) {
-    passwordMsg.value = { type: 'error', text: 'Passwords do not match.' };
+    passwordMsg.value = { type: 'error', text: t('settings.passwordsMismatch') };
     return;
   }
   savingPassword.value = true;
@@ -187,10 +186,10 @@ const changePassword = async () => {
       password: passwordForm.value.password,
       password_confirmation: passwordForm.value.password_confirmation
     });
-    passwordMsg.value = { type: 'success', text: 'Password updated successfully.' };
+    passwordMsg.value = { type: 'success', text: t('settings.passwordUpdated') };
     passwordForm.value = { current_password: '', password: '', password_confirmation: '' };
   } catch (e: any) {
-    passwordMsg.value = { type: 'error', text: e.response?.data?.message ?? 'Failed to update password.' };
+    passwordMsg.value = { type: 'error', text: e.response?.data?.message ?? t('settings.passwordFailed') };
   } finally {
     savingPassword.value = false;
   }
@@ -205,12 +204,12 @@ const onAvatarSelected = (e: Event) => {
   if (!file) return;
 
   if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
-    avatarMsg.value = { type: 'error', text: 'Please choose a PNG, JPG, or WEBP image.' };
+    avatarMsg.value = { type: 'error', text: t('settings.invalidImage') };
     input.value = '';
     return;
   }
   if (file.size > MAX_AVATAR_SIZE) {
-    avatarMsg.value = { type: 'error', text: 'Image must be under 2MB.' };
+    avatarMsg.value = { type: 'error', text: t('settings.imageTooLarge') };
     input.value = '';
     return;
   }
@@ -239,12 +238,12 @@ const uploadAvatar = async () => {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     user.value.avatar_url = data.data.avatar_url;
-    avatarMsg.value = { type: 'success', text: 'Photo updated.' };
+    avatarMsg.value = { type: 'success', text: t('settings.photoUpdated') };
     if (avatarPreview.value) URL.revokeObjectURL(avatarPreview.value);
     avatarFile.value = null;
     avatarPreview.value = null;
   } catch (e: any) {
-    avatarMsg.value = { type: 'error', text: e.response?.data?.message ?? 'Failed to upload photo.' };
+    avatarMsg.value = { type: 'error', text: e.response?.data?.message ?? t('settings.photoFailed') };
   } finally {
     uploadingAvatar.value = false;
   }

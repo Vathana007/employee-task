@@ -1,5 +1,5 @@
 <template>
-    <AppLayout title="Users" subtitle="Manage team members">
+    <AppLayout :title="t('users.title')" :subtitle="t('users.subtitle')">
         <div
             class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6"
         >
@@ -10,7 +10,7 @@
                 <input
                     v-model="searchQuery"
                     type="text"
-                    placeholder="Search users..."
+                    :placeholder="t('users.searchPlaceholder')"
                     class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 transition-shadow"
                 />
             </div>
@@ -19,7 +19,7 @@
                 class="inline-flex items-center justify-center gap-2 bg-sky-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-sky-600 transition shadow-sm cursor-pointer whitespace-nowrap"
             >
                 <UserPlus class="w-4 h-4" />
-                New User
+                {{ t("users.newUser") }}
             </button>
         </div>
 
@@ -45,9 +45,11 @@
                 class="text-center py-16"
             >
                 <Users class="w-12 h-12 text-slate-200 mx-auto mb-3" />
-                <p class="text-slate-500 font-medium">No users found</p>
+                <p class="text-slate-500 font-medium">
+                    {{ t("users.noUsersFound") }}
+                </p>
                 <p class="text-slate-400 text-sm mt-1" v-if="searchQuery">
-                    Try adjusting your search
+                    {{ t("common.tryAdjustSearch") }}
                 </p>
             </div>
             <table v-else class="w-full text-sm">
@@ -56,22 +58,22 @@
                         <th
                             class="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider"
                         >
-                            User
+                            {{ t("common.user") }}
                         </th>
                         <th
                             class="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider hidden md:table-cell"
                         >
-                            Email
+                            {{ t("common.email") }}
                         </th>
                         <th
                             class="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider hidden lg:table-cell"
                         >
-                            Joined
+                            {{ t("users.joined") }}
                         </th>
                         <th
                             class="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider"
                         >
-                            Actions
+                            {{ t("common.actions") }}
                         </th>
                     </tr>
                 </thead>
@@ -79,7 +81,8 @@
                     <tr
                         v-for="u in filteredUsers"
                         :key="u.id"
-                        class="hover:bg-slate-50 transition"
+                        @click="openView(u)"
+                        class="hover:bg-slate-50 transition cursor-pointer"
                     >
                         <td class="px-5 py-4">
                             <div class="flex items-center gap-3">
@@ -95,9 +98,10 @@
                                     alt="Avatar"
                                     class="w-8 h-8 rounded-full object-cover flex-shrink-0"
                                 />
-                                <span class="font-semibold text-slate-800">{{
-                                    u.name
-                                }}</span>
+                                <span
+                                    class="font-semibold text-slate-800 hover:text-sky-600 transition"
+                                    >{{ u.name }}</span
+                                >
                             </div>
                         </td>
                         <td
@@ -108,27 +112,27 @@
                         <td
                             class="px-5 py-4 text-slate-400 hidden lg:table-cell"
                         >
-                            {{ new Date(u.created_at).toLocaleDateString() }}
+                            {{ fmtDate(u.created_at) }}
                         </td>
-                        <td class="px-5 py-4">
+                        <td class="px-5 py-4" @click.stop>
                             <div class="flex items-center gap-1 justify-end">
                                 <button
                                     @click="openView(u)"
-                                    title="View"
+                                    :title="t('common.view')"
                                     class="text-slate-400 hover:text-slate-500 hover:bg-slate-100 rounded-lg p-2 transition cursor-pointer"
                                 >
                                     <Eye class="w-4 h-4" />
                                 </button>
                                 <button
                                     @click="openEdit(u)"
-                                    title="Edit"
+                                    :title="t('common.edit')"
                                     class="text-sky-400 hover:text-sky-500 hover:bg-sky-100 rounded-lg p-2 transition cursor-pointer"
                                 >
                                     <Edit2 class="w-4 h-4" />
                                 </button>
                                 <button
                                     @click="confirmDelete(u.id)"
-                                    title="Delete"
+                                    :title="t('common.delete')"
                                     class="text-red-500 hover:text-red-600 hover:bg-red-100 rounded-lg p-2 transition cursor-pointer"
                                 >
                                     <Trash2 class="w-4 h-4" />
@@ -141,7 +145,7 @@
         </div>
 
         <!-- View Modal -->
-        <AppModal v-model="showViewModal" title="User Details">
+        <AppModal v-model="showViewModal" :title="t('users.userDetails')">
             <div v-if="viewTarget" class="space-y-5">
                 <div class="flex items-center gap-4">
                     <div
@@ -165,7 +169,7 @@
                         </p>
                         <span
                             class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600 capitalize border border-slate-200"
-                            >{{ viewTarget.role || "User" }}</span
+                            >{{ viewTarget.role || t("common.user") }}</span
                         >
                     </div>
                 </div>
@@ -177,28 +181,20 @@
                         <p
                             class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1"
                         >
-                            Joined Date
+                            {{ t("users.joinedDate") }}
                         </p>
                         <p class="text-sm text-slate-800">
-                            {{
-                                new Date(
-                                    viewTarget.created_at,
-                                ).toLocaleDateString()
-                            }}
+                            {{ fmtDate(viewTarget.created_at) }}
                         </p>
                     </div>
                     <div>
                         <p
                             class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1"
                         >
-                            Last Updated
+                            {{ t("common.lastUpdated") }}
                         </p>
                         <p class="text-sm text-slate-800">
-                            {{
-                                new Date(
-                                    viewTarget.updated_at,
-                                ).toLocaleDateString()
-                            }}
+                            {{ fmtDate(viewTarget.updated_at) }}
                         </p>
                     </div>
                 </div>
@@ -208,7 +204,7 @@
                         @click="showViewModal = false"
                         class="px-5 py-2.5 rounded-lg bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200 transition cursor-pointer"
                     >
-                        Close
+                        {{ t("common.close") }}
                     </button>
                 </div>
             </div>
@@ -217,7 +213,8 @@
         <!-- Create/Edit Modal -->
         <AppModal
             v-model="showModal"
-            :title="editTarget ? 'Edit User' : 'New User'"
+            :title="editTarget ? t('users.editUser') : t('users.newUser')"
+            size="md"
         >
             <form
                 @submit.prevent="handleSubmit"
@@ -234,13 +231,13 @@
                 <div>
                     <label
                         class="block text-sm font-semibold text-slate-700 mb-1"
-                        >Full Name</label
+                        >{{ t("users.fullName") }}</label
                     >
                     <input
                         v-model="form.name"
                         type="text"
                         required
-                        placeholder="John Doe"
+                        :placeholder="t('users.namePlaceholder')"
                         class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
                     />
                 </div>
@@ -248,13 +245,13 @@
                 <div>
                     <label
                         class="block text-sm font-semibold text-slate-700 mb-1"
-                        >Email</label
+                        >{{ t("common.email") }}</label
                     >
                     <input
                         v-model="form.email"
                         type="email"
                         required
-                        placeholder="john@example.com"
+                        :placeholder="t('users.emailPlaceholder')"
                         class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
                     />
                 </div>
@@ -262,7 +259,7 @@
                 <div>
                     <label
                         class="block text-sm font-semibold text-slate-700 mb-1"
-                        >Role</label
+                        >{{ t("users.role") }}</label
                     >
                     <select
                         v-model="form.role"
@@ -282,13 +279,13 @@
                 <div v-if="!editTarget">
                     <label
                         class="block text-sm font-semibold text-slate-700 mb-1"
-                        >Password</label
+                        >{{ t("users.password") }}</label
                     >
                     <input
                         v-model="form.password"
                         type="password"
                         required
-                        placeholder="Min. 8 characters"
+                        :placeholder="t('settings.minChars')"
                         autocomplete="new-password"
                         class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
                     />
@@ -300,7 +297,7 @@
                         @click="showModal = false"
                         class="flex-1 py-2.5 rounded-lg border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
                     >
-                        Cancel
+                        {{ t("common.cancel") }}
                     </button>
                     <button
                         type="submit"
@@ -309,10 +306,10 @@
                     >
                         {{
                             submitting
-                                ? "Saving..."
+                                ? t("common.saving")
                                 : editTarget
-                                  ? "Update"
-                                  : "Create"
+                                  ? t("common.update")
+                                  : t("common.create")
                         }}
                     </button>
                 </div>
@@ -320,7 +317,10 @@
         </AppModal>
 
         <!-- Delete Confirmation Modal -->
-        <AppModal v-model="showDeleteModal" title="Confirm Deletion">
+        <AppModal
+            v-model="showDeleteModal"
+            :title="t('common.confirmDeletion')"
+        >
             <div class="space-y-4">
                 <div
                     class="flex items-start gap-4 p-4 bg-red-50 rounded-lg border border-red-100 text-red-800"
@@ -330,11 +330,10 @@
                     />
                     <div>
                         <h4 class="text-sm font-semibold mb-1">
-                            Are you sure?
+                            {{ t("common.areYouSure") }}
                         </h4>
                         <p class="text-sm text-red-600">
-                            This action cannot be undone. This will permanently
-                            delete the user account.
+                            {{ t("users.deleteWarning") }}
                         </p>
                     </div>
                 </div>
@@ -344,7 +343,7 @@
                         :disabled="deleting"
                         class="flex-1 py-2.5 rounded-lg border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer disabled:opacity-50"
                     >
-                        Cancel
+                        {{ t("common.cancel") }}
                     </button>
                     <button
                         @click="executeDelete"
@@ -352,7 +351,11 @@
                         class="flex-1 py-2.5 rounded-lg bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2"
                     >
                         <Trash2 class="w-4 h-4" v-if="!deleting" />
-                        {{ deleting ? "Deleting..." : "Delete User" }}
+                        {{
+                            deleting
+                                ? t("common.deleting")
+                                : t("users.deleteTitle")
+                        }}
                     </button>
                 </div>
             </div>
@@ -362,6 +365,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import {
     UserPlus,
     Users,
@@ -376,6 +380,8 @@ import AppModal from "../components/ui/AppModal.vue";
 import { useUsers } from "../composables/useUsers.js";
 import { useRoles } from "../composables/useRoles.js";
 import type { User } from "../types/index.js";
+
+const { t, locale } = useI18n();
 
 const {
     users,
@@ -398,6 +404,9 @@ const deleteTargetId = ref<number | null>(null);
 const submitting = ref(false);
 const deleting = ref(false);
 const formError = ref("");
+
+// Format dates in the active app language
+const fmtDate = (d: string) => new Date(d).toLocaleDateString(locale.value);
 
 const filteredUsers = computed(() => {
     if (!searchQuery.value) return users.value;
@@ -453,7 +462,8 @@ const handleSubmit = async () => {
         }
         showModal.value = false;
     } catch (e: any) {
-        formError.value = e.response?.data?.message ?? "Something went wrong.";
+        formError.value =
+            e.response?.data?.message ?? t("common.somethingWentWrong");
     } finally {
         submitting.value = false;
     }

@@ -15,6 +15,11 @@ class User extends Authenticatable
     // Without this trait(HasApiTokens), users cannot create tokens.
     use HasApiTokens, HasFactory, Notifiable;
 
+    public const ROLE_ADMIN = 'admin';
+    public const ROLE_HEAD = 'head';
+    public const ROLE_SENIOR = 'senior';
+    public const ROLE_USER = 'user';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -50,7 +55,59 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    
+
+    public function roleName(): string
+    {
+        return strtolower((string) $this->role ?: self::ROLE_USER);
+    }
+
+    public function hasRole(string ...$roles): bool
+    {
+        $normalizedRoles = array_map(fn (string $role) => strtolower($role), $roles);
+
+        return in_array($this->roleName(), $normalizedRoles, true);
+    }
+
+    public function hasPermission(string $permission): bool
+    {
+        $permissions = $this->rolePermissions();
+
+        return in_array($permission, $permissions, true);
+    }
+
+    public function rolePermissions(): array
+    {
+        $role = $this->roleRecord()->first();
+
+        if ($role && is_array($role->permissions)) {
+            return $role->permissions;
+        }
+
+        return Role::defaultPermissionsFor($this->roleName());
+    }
+
+    public function hasAnyPermission(array $permissions): bool
+    {
+        foreach ($permissions as $permission) {
+            if ($this->hasPermission($permission)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function hasAllPermissions(array $permissions): bool
+    {
+        foreach ($permissions as $permission) {
+            if (! $this->hasPermission($permission)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     // Table Relationships
     public function projects()
     {
@@ -65,5 +122,10 @@ class User extends Authenticatable
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    public function roleRecord()
+    {
+        return $this->belongsTo(Role::class, 'role', 'name');
     }
 }

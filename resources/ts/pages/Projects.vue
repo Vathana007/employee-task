@@ -1,5 +1,5 @@
 <template>
-    <AppLayout title="Projects" subtitle="Manage all your projects">
+    <AppLayout :title="t('projects.title')" :subtitle="t('projects.subtitle')">
         <div
             class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6"
         >
@@ -10,7 +10,7 @@
                 <input
                     v-model="searchQuery"
                     type="text"
-                    placeholder="Search projects..."
+                    :placeholder="t('projects.searchPlaceholder')"
                     class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 transition-shadow"
                 />
             </div>
@@ -19,7 +19,7 @@
                 class="inline-flex items-center justify-center gap-2 bg-sky-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-sky-600 transition shadow-sm cursor-pointer whitespace-nowrap"
             >
                 <Plus class="w-4 h-4" />
-                New Project
+                {{ t("projects.newProject") }}
             </button>
         </div>
 
@@ -50,12 +50,14 @@
             class="text-center py-16 bg-white rounded-xl border border-slate-200 shadow-sm"
         >
             <FolderOpen class="w-12 h-12 text-slate-200 mx-auto mb-3" />
-            <p class="text-slate-500 font-medium">No projects found</p>
+            <p class="text-slate-500 font-medium">
+                {{ t("projects.noProjectsFound") }}
+            </p>
             <p class="text-slate-400 text-sm mt-1" v-if="searchQuery">
-                Try adjusting your search
+                {{ t("common.tryAdjustSearch") }}
             </p>
             <p class="text-slate-400 text-sm mt-1" v-else>
-                Click "New Project" to get started
+                {{ t("projects.clickNewToStart") }}
             </p>
         </div>
 
@@ -66,7 +68,8 @@
             <div
                 v-for="project in filteredProjects"
                 :key="project.id"
-                class="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition group flex flex-col h-full"
+                @click="openView(project)"
+                class="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition cursor-pointer group flex flex-col h-full"
             >
                 <div class="flex items-start justify-between mb-3">
                     <div
@@ -78,16 +81,20 @@
                         :class="statusClass(project.status)"
                         class="text-xs font-semibold px-2.5 py-1 rounded-full capitalize"
                     >
-                        {{ project.status.replace("_", " ") }}
+                        {{ t(`status.${project.status}`) }}
                     </span>
                 </div>
-                <h3 class="font-bold text-slate-800 mb-1">
+                <h3
+                    class="font-bold text-slate-800 mb-1 group-hover:text-sky-600 transition"
+                >
                     {{ project.name }}
                 </h3>
                 <p
                     class="text-xs text-slate-400 leading-relaxed line-clamp-2 mb-4"
                 >
-                    {{ project.description || "No description provided." }}
+                    {{
+                        project.description || t("common.noDescriptionProvided")
+                    }}
                 </p>
 
                 <!-- Progress -->
@@ -99,7 +106,7 @@
                             >{{ project.completed_tasks_count ?? 0 }}/{{
                                 project.tasks_count ?? 0
                             }}
-                            tasks done</span
+                            {{ t("projects.tasksDone") }}</span
                         >
                         <span class="font-semibold"
                             >{{ progress(project) }}%</span
@@ -117,25 +124,26 @@
 
                 <div
                     class="flex items-center justify-between pt-4 mt-auto border-t border-slate-100"
+                    @click.stop
                 >
                     <button
                         @click="openView(project)"
                         class="text-xs font-semibold text-slate-500 hover:text-sky-600 transition cursor-pointer flex items-center gap-1.5"
                     >
-                        <Eye class="w-4 h-4" /> View
+                        <Eye class="w-4 h-4" /> {{ t("common.view") }}
                     </button>
                     <div class="flex items-center gap-3">
                         <button
                             @click="openEdit(project)"
                             class="text-xs font-semibold text-sky-600 hover:text-sky-700 transition cursor-pointer flex items-center gap-1.5"
                         >
-                            <Edit2 class="w-4 h-4" /> Edit
+                            <Edit2 class="w-4 h-4" /> {{ t("common.edit") }}
                         </button>
                         <button
                             @click="confirmDelete(project.id)"
                             class="text-xs font-semibold text-red-500 hover:text-red-600 transition cursor-pointer flex items-center gap-1.5"
                         >
-                            <Trash2 class="w-4 h-4" /> Delete
+                            <Trash2 class="w-4 h-4" /> {{ t("common.delete") }}
                         </button>
                     </div>
                 </div>
@@ -143,13 +151,13 @@
         </div>
 
         <!-- View Modal -->
-        <AppModal v-model="showViewModal" title="Project Details">
+        <AppModal v-model="showViewModal" :title="t('projects.projectDetails')">
             <div v-if="viewTarget" class="space-y-5">
                 <div>
                     <p
                         class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1"
                     >
-                        Project Name
+                        {{ t("projects.projectName") }}
                     </p>
                     <p class="text-sm font-medium text-slate-800">
                         {{ viewTarget.name }}
@@ -159,20 +167,20 @@
                     <p
                         class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1"
                     >
-                        Status
+                        {{ t("common.status") }}
                     </p>
                     <span
                         :class="statusClass(viewTarget.status)"
                         class="text-xs font-semibold px-2.5 py-1 rounded-full capitalize inline-block mt-1"
                     >
-                        {{ viewTarget.status.replace("_", " ") }}
+                        {{ t(`status.${viewTarget.status}`) }}
                     </span>
                 </div>
                 <div>
                     <p
                         class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1"
                     >
-                        Progress
+                        {{ t("common.progress") }}
                     </p>
                     <div
                         class="flex justify-between text-xs text-slate-500 mb-1 mt-1"
@@ -181,7 +189,7 @@
                             >{{ viewTarget.completed_tasks_count ?? 0 }}/{{
                                 viewTarget.tasks_count ?? 0
                             }}
-                            tasks done</span
+                            {{ t("projects.tasksDone") }}</span
                         >
                         <span class="font-semibold"
                             >{{ progress(viewTarget) }}%</span
@@ -200,13 +208,14 @@
                     <p
                         class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1"
                     >
-                        Description
+                        {{ t("common.description") }}
                     </p>
                     <p
                         class="text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100 mt-1"
                     >
                         {{
-                            viewTarget.description || "No description provided."
+                            viewTarget.description ||
+                            t("common.noDescriptionProvided")
                         }}
                     </p>
                 </div>
@@ -217,28 +226,20 @@
                         <p
                             class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1"
                         >
-                            Created
+                            {{ t("common.created") }}
                         </p>
                         <p class="text-sm text-slate-800">
-                            {{
-                                new Date(
-                                    viewTarget.created_at,
-                                ).toLocaleDateString()
-                            }}
+                            {{ fmtDate(viewTarget.created_at) }}
                         </p>
                     </div>
                     <div>
                         <p
                             class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1"
                         >
-                            Last Updated
+                            {{ t("common.lastUpdated") }}
                         </p>
                         <p class="text-sm text-slate-800">
-                            {{
-                                new Date(
-                                    viewTarget.updated_at,
-                                ).toLocaleDateString()
-                            }}
+                            {{ fmtDate(viewTarget.updated_at) }}
                         </p>
                     </div>
                 </div>
@@ -247,7 +248,7 @@
                         @click="showViewModal = false"
                         class="px-5 py-2.5 rounded-lg bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200 transition cursor-pointer"
                     >
-                        Close
+                        {{ t("common.close") }}
                     </button>
                 </div>
             </div>
@@ -256,7 +257,12 @@
         <!-- Create/Edit Modal -->
         <AppModal
             v-model="showModal"
-            :title="editTarget ? 'Edit Project' : 'New Project'"
+            :title="
+                editTarget
+                    ? t('projects.editProject')
+                    : t('projects.newProject')
+            "
+            size="md"
         >
             <form @submit.prevent="handleSubmit" class="space-y-4">
                 <div
@@ -269,13 +275,13 @@
                 <div>
                     <label
                         class="block text-sm font-semibold text-slate-700 mb-1"
-                        >Project Name</label
+                        >{{ t("projects.projectName") }}</label
                     >
                     <input
                         v-model="form.name"
                         type="text"
                         required
-                        placeholder="e.g. Website Redesign"
+                        :placeholder="t('projects.namePlaceholder')"
                         class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
                     />
                 </div>
@@ -283,12 +289,12 @@
                 <div>
                     <label
                         class="block text-sm font-semibold text-slate-700 mb-1"
-                        >Description</label
+                        >{{ t("common.description") }}</label
                     >
                     <textarea
                         v-model="form.description"
                         rows="3"
-                        placeholder="Optional description..."
+                        :placeholder="t('common.optionalDescription')"
                         class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none"
                     ></textarea>
                 </div>
@@ -296,16 +302,22 @@
                 <div>
                     <label
                         class="block text-sm font-semibold text-slate-700 mb-1"
-                        >Status</label
+                        >{{ t("common.status") }}</label
                     >
                     <select
                         v-model="form.status"
                         required
                         class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
                     >
-                        <option value="pending">Pending</option>
-                        <option value="in_progress">In Progress</option>
-                        <option value="completed">Completed</option>
+                        <option value="pending">
+                            {{ t("status.pending") }}
+                        </option>
+                        <option value="in_progress">
+                            {{ t("status.in_progress") }}
+                        </option>
+                        <option value="completed">
+                            {{ t("status.completed") }}
+                        </option>
                     </select>
                 </div>
 
@@ -315,7 +327,7 @@
                         @click="showModal = false"
                         class="flex-1 py-2.5 rounded-lg border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
                     >
-                        Cancel
+                        {{ t("common.cancel") }}
                     </button>
                     <button
                         type="submit"
@@ -324,10 +336,10 @@
                     >
                         {{
                             submitting
-                                ? "Saving..."
+                                ? t("common.saving")
                                 : editTarget
-                                  ? "Update"
-                                  : "Create"
+                                  ? t("common.update")
+                                  : t("common.create")
                         }}
                     </button>
                 </div>
@@ -335,7 +347,10 @@
         </AppModal>
 
         <!-- Delete Confirmation Modal -->
-        <AppModal v-model="showDeleteModal" title="Confirm Deletion">
+        <AppModal
+            v-model="showDeleteModal"
+            :title="t('common.confirmDeletion')"
+        >
             <div class="space-y-4">
                 <div
                     class="flex items-start gap-4 p-4 bg-red-50 rounded-lg border border-red-100 text-red-800"
@@ -345,11 +360,10 @@
                     />
                     <div>
                         <h4 class="text-sm font-semibold mb-1">
-                            Are you sure?
+                            {{ t("common.areYouSure") }}
                         </h4>
                         <p class="text-sm text-red-600">
-                            This action cannot be undone. This will permanently
-                            delete the project and all its associated tasks.
+                            {{ t("projects.deleteWarning") }}
                         </p>
                     </div>
                 </div>
@@ -359,7 +373,7 @@
                         :disabled="deleting"
                         class="flex-1 py-2.5 rounded-lg border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer disabled:opacity-50"
                     >
-                        Cancel
+                        {{ t("common.cancel") }}
                     </button>
                     <button
                         @click="executeDelete"
@@ -367,7 +381,11 @@
                         class="flex-1 py-2.5 rounded-lg bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2"
                     >
                         <Trash2 class="w-4 h-4" v-if="!deleting" />
-                        {{ deleting ? "Deleting..." : "Delete Project" }}
+                        {{
+                            deleting
+                                ? t("common.deleting")
+                                : t("projects.deleteTitle")
+                        }}
                     </button>
                 </div>
             </div>
@@ -377,6 +395,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import {
     Plus,
     FolderOpen,
@@ -390,6 +409,8 @@ import AppLayout from "../components/layout/AppLayout.vue";
 import AppModal from "../components/ui/AppModal.vue";
 import { useProjects } from "../composables/useProjects.js";
 import type { Project } from "../types/index.js";
+
+const { t, locale } = useI18n();
 
 const {
     projects,
@@ -411,6 +432,9 @@ const deleteTargetId = ref<number | null>(null);
 const submitting = ref(false);
 const deleting = ref(false);
 const formError = ref("");
+
+// Format dates in the active app language
+const fmtDate = (d: string) => new Date(d).toLocaleDateString(locale.value);
 
 const filteredProjects = computed(() => {
     if (!searchQuery.value) return projects.value;
@@ -474,7 +498,8 @@ const handleSubmit = async () => {
         }
         showModal.value = false;
     } catch (e: any) {
-        formError.value = e.response?.data?.message ?? "Something went wrong.";
+        formError.value =
+            e.response?.data?.message ?? t("common.somethingWentWrong");
     } finally {
         submitting.value = false;
     }
