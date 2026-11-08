@@ -1,6 +1,12 @@
 <template>
     <div
         class="min-h-screen relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-sky-50 via-white to-sky-100">
+        <!-- Language Toggle -->
+        <button @click="onToggleLocale" :title="t('layout.switchLanguage')"
+            class="fixed top-4 right-4 z-20 px-2.5 py-1.5 rounded-lg bg-white/70 backdrop-blur-sm shadow-sm hover:bg-white transition cursor-pointer text-xs font-bold text-slate-600 min-w-[2.5rem]">
+            {{ locale === 'km' ? t('layout.languageEn') : t('layout.languageKm') }}
+        </button>
+
         <!-- Background -->
         <div
             class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-sky-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob">
@@ -26,11 +32,11 @@
                     </div>
 
                     <h2 class="text-3xl font-bold tracking-tight text-slate-800">
-                        Reset Password
+                        {{ t('auth.resetPassword') }}
                     </h2>
 
                     <p class="mt-2 text-sm text-slate-500">
-                        Enter your email to receive a password reset link
+                        {{ t('auth.resetPrompt') }}
                     </p>
                 </div>
 
@@ -43,12 +49,10 @@
                         </div>
 
                         <div>
-                            <h3 class="text-lg font-semibold text-slate-800 mb-2">Check your email</h3>
-                            <p class="text-sm text-slate-600 mb-4">
-                                We've sent password reset instructions to <strong>{{ form.email }}</strong>
-                            </p>
+                            <h3 class="text-lg font-semibold text-slate-800 mb-2">{{ t('auth.checkEmail') }}</h3>
+                            <p class="text-sm text-slate-600 mb-4" v-html="t('auth.resetSent', { email: `<strong>${form.email}</strong>` })"></p>
                             <p class="text-xs text-slate-400">
-                                If you don't see the email, check your spam folder or try again.
+                                {{ t('auth.spamHint') }}
                             </p>
                         </div>
 
@@ -56,7 +60,7 @@
                             <button @click="handleBackToLogin"
                                 class="w-full flex items-center justify-center rounded-xl bg-sky-500 px-4 py-3 text-sm font-semibold text-white hover:bg-sky-400 transition-all cursor-pointer">
                                 <ArrowLeft class="w-4 h-4 mr-2" />
-                                Back to Login
+                                {{ t('auth.backToLogin') }}
                             </button>
                         </div>
                     </div>
@@ -77,7 +81,7 @@
                         <!-- Email -->
                         <div>
                             <label for="email" class="block text-sm font-semibold text-slate-700 mb-1">
-                                Email Address
+                                {{ t('auth.emailAddress') }}
                             </label>
 
                             <div class="relative">
@@ -88,7 +92,7 @@
                                     class="block w-full rounded-xl border-0 py-2.5 pl-10 text-slate-900 bg-white/50 shadow-sm ring-1 ring-inset ring-slate-200 focus:ring-2 focus:ring-sky-500 focus:bg-white sm:text-sm" />
                             </div>
                             <p class="text-xs text-slate-400 mt-1">
-                                We'll send you a link to reset your password
+                                {{ t('auth.resetLinkHint') }}
                             </p>
                         </div>
 
@@ -96,7 +100,7 @@
                         <button type="submit" :disabled="loading"
                             class="group flex w-full justify-center rounded-xl bg-sky-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 hover:bg-sky-400 transition-all disabled:opacity-70 cursor-pointer">
                             <span v-if="!loading" class="flex items-center">
-                                Send Reset Link
+                                {{ t('auth.sendResetLink') }}
 
                                 <ArrowRight class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                             </span>
@@ -104,17 +108,17 @@
                             <span v-else class="flex items-center">
                                 <LoaderCircle class="animate-spin mr-3 h-5 w-5" />
 
-                                Sending...
+                                {{ t('common.processing') }}
                             </span>
                         </button>
                     </form>
 
                     <!-- Back to Login -->
-                    <p class="mt-8 text-center text-sm text-slate-500">
-                        Remember your password?
+                    <p v-if="!submitted" class="mt-8 text-center text-sm text-slate-500">
+                        {{ t('auth.rememberPassword') }}
 
                         <router-link to="/login" class="font-semibold text-sky-600 hover:text-sky-500">
-                            Sign in
+                            {{ t('auth.signInLink') }}
                         </router-link>
                     </p>
                 </div>
@@ -126,6 +130,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { toggleLocale } from '../i18n';
 
 import {
     ArrowLeft,
@@ -140,6 +146,7 @@ import {
 import api from '../services/api';
 
 const router = useRouter();
+const { t, locale } = useI18n();
 
 const form = ref({
     email: '',
@@ -149,12 +156,16 @@ const error = ref('');
 const loading = ref(false);
 const submitted = ref(false);
 
+function onToggleLocale() {
+    toggleLocale();
+}
+
 const handleForgotPassword = async () => {
     loading.value = true;
     error.value = '';
 
     try {
-        const response = await api.post('/forgot-password', form.value);
+        await api.post('/forgot-password', form.value);
 
         submitted.value = true;
     } catch (err: any) {

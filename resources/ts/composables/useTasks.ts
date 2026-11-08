@@ -9,7 +9,8 @@ export interface TaskPayload {
     description?: string;
     priority: Task["priority"];
     status: Task["status"];
-    deadline?: string;
+    start_date?: string | null;
+    end_date?: string | null;
 }
 
 export function useTasks() {

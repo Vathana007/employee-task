@@ -28,7 +28,8 @@ export interface Task {
     description: string | null;
     priority: "low" | "medium" | "high";
     status: "pending" | "in_progress" | "completed";
-    deadline: string | null;
+    start_date: string | null;
+    end_date: string | null;
     created_at: string;
     updated_at: string;
 }

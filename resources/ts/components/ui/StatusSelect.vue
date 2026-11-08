@@ -1,16 +1,19 @@
 <template>
   <select :value="modelValue" :disabled="disabled" @change="onChange"
     :class="[styles[modelValue], 'text-xs font-semibold pl-2.5 pr-1 py-1 rounded-full cursor-pointer border-0 focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-60']">
-    <option v-for="o in STATUS_OPTIONS" :key="o.value" :value="o.value">{{ o.label }}</option>
+    <option v-for="o in STATUS_OPTIONS" :key="o.value" :value="o.value">{{ t(o.labelKey) }}</option>
   </select>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import { STATUS_OPTIONS } from '../../utils/status.js';
 import type { TaskStatus } from '../../types/index.js';
 
 defineProps<{ modelValue: TaskStatus; disabled?: boolean }>();
 const emit = defineEmits<{ (e: 'change', value: TaskStatus): void }>();
+
+const { t } = useI18n();
 
 const styles: Record<TaskStatus, string> = {
   pending: 'bg-amber-50 text-amber-600',

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use App\Models\Task;
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
@@ -22,7 +24,7 @@ class TaskController extends Controller
     {
         $task = Task::find($id);
 
-        if (! $task) {
+        if (!$task) {
             return response()->json([
                 'message' => 'Task not found',
             ], 404);
@@ -36,25 +38,22 @@ class TaskController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'project_id' => 'required|exists:projects,id',
             'user_id' => 'required|exists:users,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'priority' => 'required|in:low,medium,high',
             'status' => 'required|in:pending,in_progress,completed',
-            'deadline' => 'nullable|date',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
         ]);
 
-        $task = Task::create([
-            'project_id' => $request->project_id,
-            'user_id' => $request->user_id,
-            'title' => $request->title,
-            'description' => $request->description,
-            'priority' => $request->priority,
-            'status' => $request->status,
-            'deadline' => $request->deadline,
-        ]);
+        if ($error = $this->dateRangeError($validated['start_date'] ?? null, $validated['end_date'] ?? null)) {
+            return $error;
+        }
+
+        $task = Task::create($validated);
 
         Project::find($task->project_id)?->syncStatus();
 
@@ -68,7 +67,7 @@ class TaskController extends Controller
     {
         $task = Task::find($id);
 
-        if (! $task) {
+        if (!$task) {
             return response()->json([
                 'message' => 'Task not found',
             ], 404);
@@ -81,8 +80,17 @@ class TaskController extends Controller
             'description' => 'nullable|string',
             'priority' => 'sometimes|required|in:low,medium,high',
             'status' => 'sometimes|required|in:pending,in_progress,completed',
-            'deadline' => 'nullable|date',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
         ]);
+
+        // Check the range against the saved value when only one date is sent
+        $startDate = array_key_exists('start_date', $validated) ? $validated['start_date'] : $task->start_date;
+        $endDate = array_key_exists('end_date', $validated) ? $validated['end_date'] : $task->end_date;
+
+        if ($error = $this->dateRangeError($startDate, $endDate)) {
+            return $error;
+        }
 
         $oldProjectId = $task->project_id;
 
@@ -104,7 +112,7 @@ class TaskController extends Controller
     {
         $task = Task::find($id);
 
-        if (! $task) {
+        if (!$task) {
             return response()->json([
                 'message' => 'Task not found',
             ], 404);
@@ -119,5 +127,19 @@ class TaskController extends Controller
         return response()->json([
             'message' => 'Task deleted successfully',
         ]);
+    }
+
+    private function dateRangeError(?string $startDate, ?string $endDate): ?JsonResponse
+    {
+        if ($startDate && $endDate && Carbon::parse($endDate)->lt(Carbon::parse($startDate))) {
+            return response()->json([
+                'message' => 'End date cannot be before start date',
+                'errors' => [
+                    'end_date' => ['End date cannot be before start date'],
+                ],
+            ], 422);
+        }
+
+        return null;
     }
 }

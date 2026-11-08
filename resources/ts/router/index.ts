@@ -38,6 +38,12 @@ const routes = [
         meta: { requiresAuth: true },
     },
     {
+        path: "/audit-log",
+        name: "AuditLog",
+        component: () => import("../pages/AuditLog.vue"),
+        meta: { requiresAuth: true },
+    },
+    {
         path: "/login",
         name: "Login",
         component: () => import("../pages/Login.vue"),
@@ -62,11 +68,11 @@ const routes = [
         meta: { guest: true },
     },
     {
-        path: '/verify-email',
-        name: 'VerifyEmail',
-        component: () => import('../pages/VerifyEmail.vue'),
-        meta: { layout: 'blank', requiresGuest: true }
-    }
+        path: "/verify-email",
+        name: "VerifyEmail",
+        component: () => import("../pages/VerifyEmail.vue"),
+        meta: { guest: true },
+    },
 ];
 
 const router = createRouter({
@@ -74,16 +80,18 @@ const router = createRouter({
     routes,
 });
 
-router.beforeEach((to, _from, next) => {
+router.beforeEach((to) => {
     const token = localStorage.getItem("access_token");
 
     if (to.meta.requiresAuth && !token) {
-        next({ name: "Login" });
-    } else if (to.meta.guest && token) {
-        next({ name: "Dashboard" });
-    } else {
-        next();
+        return { name: "Login" };
     }
+
+    if (to.meta.guest && token) {
+        return { name: "Dashboard" };
+    }
+
+    return true;
 });
 
 export default router;
